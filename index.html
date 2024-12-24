@@ -1,11 +1,155 @@
 <!doctype html>
 <html>
-  <head>
+
+<head>
     <title>849 Bluff Dr Parking</title>
     <script defer data-domain="bluff.estate" src="https://plausible.io/js/script.js"></script>
-  </head>
-  <body style="background-color: gray; font-family: sans-serif;">
-    <h1 style="text-align: center;">Call/Text 500-0849</h1>
-    <img src="parking.jpg" style="width: 100%;">
-  </body>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immersive House Navigation</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .input-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        input {
+            width: 300px;
+            padding: 5px;
+        }
+    </style>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.9.1/mapbox-gl.css' rel='stylesheet' />
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.9.1/mapbox-gl.js"></script>
+    <script>
+        // Mapbox Access Token
+        mapboxgl.accessToken = 'pk.eyJ1IjoicHRhYmxlIiwiYSI6ImNtNTF4Nnk2YzF1cmoycXBrdDljanM3YzQifQ.C4Iq-EW_DvB-UWVZdjSagg'; // Replace with your Mapbox token
+
+        // House location coordinates
+        const houseLocation = [-83.95866,35.93985]; // Replace with your house's longitude, latitude
+
+        // Initialize Map
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/satellite-v9', // Latest Mapbox Standard style
+            center: [-83.96081871256212,35.939880517597],
+            zoom: 18, // Adjust initial zoom level
+            pitch: 45, // Tilt for 3D perspective
+            bearing: 90,
+        });
+
+        // Load 3D Buildings and Custom Layers
+        map.on('load', () => {
+            // Add terrain source and set terrain
+            map.addSource('mapbox-dem', {
+                'type': 'raster-dem',
+                'url': 'mapbox://mapbox.terrain-rgb',
+                'tileSize': 512,
+                'maxzoom': 18
+            });
+            map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1 });
+
+            // Add 3D buildings
+            map.addLayer({
+                id: '3d-buildings',
+                source: 'composite',
+                'source-layer': 'building',
+                type: 'fill-extrusion',
+                minzoom: 15,
+                paint: {
+                    'fill-extrusion-color': '#aaa',
+                    'fill-extrusion-height': ['get', 'height'],
+                    'fill-extrusion-base': ['get', 'min_height'],
+                    'fill-extrusion-opacity': 0.6,
+                },
+            });
+
+            // Add custom orthophoto (replace with your image and coordinates)
+            map.addSource('orthophoto', {
+                type: 'image',
+                url: 'https://bluff.estate/parking.jpg', // Replace with your orthophoto URL
+                coordinates: [
+                    [-83.95931, 35.93940], // Top-left
+                    [-83.95911, 35.94050], // Top-right
+                    [-83.95801, 35.94030], // Bottom-right
+                    [-83.95821, 35.93920], // Bottom-left
+                ],
+            });
+            map.addLayer({
+                id: 'orthophoto-layer',
+                source: 'orthophoto',
+                type: 'raster',
+                paint: { 'raster-opacity': 0.9 },
+            });
+
+            // Fly to different points
+            function flyToSouth() {
+                map.flyTo({
+                    center: [-83.95844192360883, 35.93939855989102], // Move 300 feet south
+                    zoom: 18,
+                    pitch: 45, // Maintain 45-degree tilt
+                    bearing: 90, // Facing south
+                    speed: 0.5,
+                    curve: 1,
+                    easing: (t) => t,
+                    essential: true,
+                });
+                map.once('moveend', flyToWest);
+            }
+
+            function flyToWest() {
+                map.flyTo({
+                    center: [-83.9581613322059, 35.9399637012948], // Move 100 feet west
+                    zoom: 18,
+                    pitch: 30, // Maintain 45-degree tilt
+                    bearing: 0, // Turn left 90 degrees to face west
+                    speed: 0.2,
+                    curve: 1,
+                    easing: (t) => t,
+                    essential: true,
+                });
+                map.once('moveend', flyToOverhead);
+            }
+
+            function flyToOverhead() {
+                map.flyTo({
+                    center: houseLocation, // Final destination
+                    zoom: 19,
+                    pitch: 0, // Overhead view
+                    bearing: 280, // Final bearing
+                    speed: 0.5,
+                    curve: 1,
+                    easing: (t) => t,
+                    essential: true,
+                });
+            }
+
+            // Start the animation sequence
+            flyToSouth();
+        });
+    </script>
+</body>
+
 </html>
