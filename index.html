@@ -91,17 +91,17 @@
                 type: 'image',
                 url: 'https://bluff.estate/parking.jpg', // Replace with your orthophoto URL
                 coordinates: [
-                    [-83.95931, 35.93940], // Top-left
-                    [-83.95911, 35.94050], // Top-right
-                    [-83.95801, 35.94030], // Bottom-right
-                    [-83.95821, 35.93920], // Bottom-left
+                    [-83.95942, 35.93949], // Top-left
+                    [-83.95917, 35.94056], // Top-right
+                    [-83.95786, 35.94025], // Bottom-right
+                    [-83.95823, 35.93925], // Bottom-left
                 ],
             });
             map.addLayer({
                 id: 'orthophoto-layer',
                 source: 'orthophoto',
                 type: 'raster',
-                paint: { 'raster-opacity': 0.9 },
+                paint: { 'raster-opacity': 1 },
             });
 
             // Fly to different points
@@ -111,23 +111,9 @@
                     zoom: 18,
                     pitch: 45, // Maintain 45-degree tilt
                     bearing: 90, // Facing south
-                    speed: 0.5,
-                    curve: 1,
-                    easing: (t) => t,
-                    essential: true,
-                });
-                map.once('moveend', flyToWest);
-            }
-
-            function flyToWest() {
-                map.flyTo({
-                    center: [-83.9581613322059, 35.9399637012948], // Move 100 feet west
-                    zoom: 18,
-                    pitch: 30, // Maintain 45-degree tilt
-                    bearing: 0, // Turn left 90 degrees to face west
                     speed: 0.2,
                     curve: 1,
-                    easing: (t) => t,
+                    easing: (t) => t * (2 - t), // Ease out for smoother deceleration
                     essential: true,
                 });
                 map.once('moveend', flyToOverhead);
@@ -138,10 +124,10 @@
                     center: houseLocation, // Final destination
                     zoom: 19,
                     pitch: 0, // Overhead view
-                    bearing: 280, // Final bearing
-                    speed: 0.5,
+                    bearing: 283, // Final bearing
+                    speed: 0.1, // Slower speed for final approach
                     curve: 1,
-                    easing: (t) => t,
+                    easing: (t) => 1 - Math.pow(1 - t, 3), // Cubic ease-out for smooth deceleration
                     essential: true,
                 });
             }
